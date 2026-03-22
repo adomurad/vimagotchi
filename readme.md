@@ -5,12 +5,12 @@
 ```lua
 {
   "adomurad/vimagotchi",
-    config = function()
-      local vimagotchi = require 'vimagotchi'
+  config = function()
+    local vimagotchi = require 'vimagotchi'
+    vimagotchi.setup {}
 
-      vimagotchi.setup {}
-
-      vimagotchi.open()
+    vimagotchi.open()
+  end
 }
 ```
 
