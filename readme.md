@@ -1,5 +1,9 @@
 # Vimagtochi
 
+## Demo
+
+![demo gif](./demo.gif)
+
 ## Instalation
 
 ```lua
