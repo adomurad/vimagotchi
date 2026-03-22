@@ -6,15 +6,25 @@
 {
   "adomurad/vimagotchi",
   config = function()
-    local vimagotchi = require 'vimagotchi'
-    vimagotchi.setup {}
+    require('vimagotchi').setup {}
 
-    vimagotchi.open()
-  end
+    require('vimagotchi').open()
 }
 ```
 
 ## Options
+
+Default options:
+
+```lua
+require('vimagotchi').setup {
+  eat_on = {
+    delete = true,
+    change = false,
+    yank = false,
+  },
+}
+```
 
 ## Commands
 
