@@ -13,6 +13,7 @@
     require('vimagotchi').setup {}
 
     require('vimagotchi').open()
+  end,
 }
 ```
 
