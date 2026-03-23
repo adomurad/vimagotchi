@@ -126,12 +126,13 @@ function M.open()
 		relative = "editor",
 		width = Game.width,
 		height = Game.height,
-		col = vim.o.columns - Game.width - 2, -- 2 = small padding
-		row = vim.o.lines - Game.height - 3 - 1, -- status + cmdline + padding + lualine
+		col = vim.o.columns / 8,
+		row = vim.o.lines / 2,
 		style = "minimal",
-		border = "single", -- or 'rounded', 'none', etc.
+		border = "none", -- or 'rounded', 'none', etc.
 		focusable = false,
 	})
+	Game.win_id = M._state.win_id
 end
 
 function M.close()

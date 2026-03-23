@@ -13,11 +13,15 @@ M._state = {
 	text_to_eat = "",
 }
 
-M.height = 10
-M.width = 40
+M.height = 7
+M.width = 11
+
+M.win_id = nil
 
 function M.init()
 	-- nothing
+	M._state.pos.x = vim.o.columns / 8
+	M._state.pos.y = vim.o.lines / 2
 end
 
 local function stringToArray(str)
@@ -38,20 +42,20 @@ local function render_creature_in_window(creature_frame)
 	local lines = {}
 
 	-- above creature
-	local pos = M._state.pos
-	if pos.y > 1 then
-		for y = 1, pos.y - 1 do
-			lines[y] = ""
-		end
-	end
+	-- local pos = M._state.pos
+	-- if pos.y > 1 then
+	-- 	for y = 1, pos.y - 1 do
+	-- 		lines[y] = ""
+	-- 	end
+	-- end
 
 	-- creature
-	for y = pos.y, pos.y + creature.char_height do
-		local padding = string.rep(" ", pos.x - 1)
-		lines[y] = padding .. char_lines[y + 1 - pos.y]
+	for y = 1, creature.char_height do
+		-- local padding = string.rep(" ", pos.x - 1)
+		lines[y] = char_lines[y]
 
 		-- line with the eaten text
-		if #M._state.text_to_eat > 0 and y == pos.y + 2 then
+		if #M._state.text_to_eat > 0 and y == 1 + 2 then
 			local chars = stringToArray(lines[y])
 			local head, tail = vim.list_slice(chars, 1, #chars - 6), vim.list_slice(chars, #chars - 5)
 			lines[y] = table.concat(head)
@@ -112,28 +116,80 @@ local function get_creature_frame()
 	return idle_frame
 end
 
+local function get_editor_cursor_pos()
+	local win = vim.api.nvim_get_current_win()
+	local win_pos = vim.api.nvim_win_get_position(win)
+	local win_row = vim.fn.winline() - 1
+	local win_col = vim.fn.wincol() - 1
+	return {
+		y = win_pos[1] + win_row, -- 0-based
+		x = win_pos[2] + win_col, -- 0-based
+	}
+end
+
 local function move_creature()
 	local pos = M._state.pos
-	local rand_dir = math.random(0, 5)
 
-	if rand_dir == 0 then
-		pos.x = pos.x + 1
-	elseif rand_dir == 1 then
-		pos.x = pos.x - 1
-	elseif rand_dir == 2 then
-		pos.y = pos.y + 1
-	elseif rand_dir == 3 then
-		pos.y = pos.y - 1
+	local cursor = get_editor_cursor_pos()
+
+	-- if math.abs(cursor.y - pos.y) < 1 then
+	-- 	-- if cursor.y > pos.y then
+	-- 	pos.y = pos.y + 1
+	-- 	-- else
+	-- 	-- pos.y = pos.y + 1
+	-- 	-- end
+	-- elseif math.abs(cursor.y - (pos.y + M.height)) < 1 then
+	-- 	pos.y = pos.y - 1
+
+	local x_cross = cursor.x >= pos.x and cursor.x <= pos.x + M.width
+	local y_cross = cursor.y >= pos.y and cursor.y < pos.y + M.height
+
+	if y_cross or x_cross then
+		if y_cross then
+			if cursor.y - pos.y < 3 then
+				pos.y = pos.y + 1
+			else
+				pos.y = pos.y - 1
+			end
+		end
+
+		if x_cross then
+			if cursor.x - pos.x < 3 then
+				pos.x = pos.x + 1
+			else
+				pos.x = pos.x - 1
+			end
+		end
+	else
+		local rand_dir = math.random(0, 5)
+
+		if rand_dir == 0 then
+			pos.x = pos.x + 1
+		elseif rand_dir == 1 then
+			pos.x = pos.x - 1
+		elseif rand_dir == 2 then
+			pos.y = pos.y + 1
+		elseif rand_dir == 3 then
+			pos.y = pos.y - 1
+		end
 	end
 
-	if pos.x > M.width - creature.char_width + 1 then
-		pos.x = M.width - creature.char_width + 1
+	if pos.x > vim.o.columns - creature.char_width + 1 then
+		pos.x = vim.o.columns - creature.char_width + 1
 	elseif pos.x < 1 then
 		pos.x = 1
-	elseif pos.y > M.height - creature.char_height + 1 then
-		pos.y = M.height - creature.char_height + 1
+	elseif pos.y > vim.o.lines - creature.char_height + 1 then
+		pos.y = vim.o.lines - creature.char_height + 1
 	elseif pos.y < 1 then
 		pos.y = 1
+	end
+
+	if M.win_id ~= nil then
+		vim.api.nvim_win_set_config(M.win_id, {
+			relative = "editor",
+			col = pos.x,
+			row = pos.y,
+		})
 	end
 end
 
