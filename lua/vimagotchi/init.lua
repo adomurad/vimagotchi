@@ -132,6 +132,8 @@ function M.open()
 		border = "single", -- or 'rounded', 'none', etc.
 		focusable = false,
 	})
+
+	vim.api.nvim_set_option_value("wrap", false, { win = M._state.win_id })
 end
 
 function M.close()
